@@ -10,7 +10,11 @@ def generate_m(movies_idx, users, ratings):
     # Complete the datastructure for rating matrix 
     # @TODO 
     
-    m = None
+    # This function should return a data structure M, such that M[user][movie] yields the rating for a user and a movie.
+
+    m = pd.DataFrame(np.nan, index=users, columns=movies_idx)
+    for idx, row in ratings.iterrows():
+        m.at[row["userId"], row["movieId"]] = row["rating"]
     
     return m 
 
