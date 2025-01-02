@@ -8,7 +8,6 @@ import utils as ut
 
 def generate_m(movies_idx, users, ratings):
     # Complete the datastructure for rating matrix 
-    # @TODO 
     
     # This function should return a data structure M, such that M[user][movie] yields the rating for a user and a movie.
 
@@ -20,31 +19,69 @@ def generate_m(movies_idx, users, ratings):
 
 
 def user_based_recommender(target_user_idx, matrix):
-    target_user = matrix.iloc[target_user_idx]
-    recommendations = []
-    
     # Compute the similarity between  the target user and each other user in the matrix. 
     # We recomend to store the results in a dataframe (userId and Similarity)
-    # @TODO 
 
-    similarities = pd.DataFrame(columns=["userId", "similarity"])
+    # Extract the target user's row
+    target_user = matrix.loc[target_user_idx]
 
-    for idx, user in matrix.iterrows():
-        if idx == target_user_idx:
-            continue
-        similarity = sim.compute_similarity(target_user, user)
-        similarities = similarities.append({"userId": idx, "similarity": similarity}, ignore_index=True)
+    similarity_scores = []  # To store (user_id, similarity) tuples
 
+    # Iterate over all other users
+    for other_user_id in matrix.index:
+        if other_user_id != target_user_idx:  # Skip the target user itself
+            # Get the other user's ratings
+            other_user = matrix.loc[other_user_id]
+            
+            # Fill NaN values with 0 for similarity computation
+            similarity = sim.compute_similarity(
+                target_user.fillna(0).tolist(),
+                other_user.fillna(0).tolist()
+            )
+            
+            # Append the similarity score
+            similarity_scores.append((other_user_id, similarity))
+
+    u_max = 10 # select u_max most similar users
+    similarity_scores.sort(key=lambda x: x[1], reverse=True)
+    similarity_scores = similarity_scores[:u_max]
+  
     
+    # Convert to DataFrame and sort by similarity
+    similarity_df = pd.DataFrame(similarity_scores, columns=["userId", "similarity"])
+    similarity_df = similarity_df.sort_values(by="similarity", ascending=False)
+
+    print(f"similarity_df.shape = {similarity_df.shape}")
+
     # Determine the unseen movies by the target user. Those films are identfied 
     # since don't have any rating. 
-    # @TODO 
+ 
+    unseen_movies = target_user[target_user.isna()].index
+    print(f"unseen movies: {len(unseen_movies)}")
 
-    unseen_movies = target_user[target_user.isnull()].index
-     
     # Generate recommendations for unrated movies based on user similarity and ratings.
-    # @ TODO 
 
+    recommendations = []
+
+    average_rating_a =  matrix.loc[target_user_idx].mean(skipna=True)
+
+    for movie in unseen_movies:
+        sum = 0
+        num_of_movies = 0
+        for user_idx, similarity in similarity_df.values:
+            user_rating = matrix.loc[user_idx, movie] # rating user_idx gave for movie with id "movie"
+            average_rating_b = matrix.loc[user_idx].mean(skipna=True)  # avg rating given by user user_idx
+            if not np.isnan(user_rating):  # Only consider users who rated this movie
+                sum += similarity * (user_rating - average_rating_b)
+                num_of_movies += 1
+        
+        # Calculate predicted rating
+        if num_of_movies > 0:
+            predicted_rating = average_rating_a + sum
+            recommendations.append((movie, predicted_rating))
+
+    # Sort recommendations by predicted rating in descending order
+    recommendations.sort(key=lambda x: x[1], reverse=True)
     
     return recommendations
 
@@ -53,7 +90,7 @@ def user_based_recommender(target_user_idx, matrix):
 if __name__ == "__main__":
     
     # Load the dataset
-    path_to_ml_latest_small = '/home/albert/Projects/practica_recomenders/ml-latest-small/'
+    path_to_ml_latest_small = './irrs5/data'
     dataset = ut.load_dataset_from_source(path_to_ml_latest_small)
 
     # Ratings data
@@ -77,14 +114,6 @@ if __name__ == "__main__":
     
     # Validation
     matrixmpa_genres = ut.matrix_genres(dataset["movies.csv"])
+    #print(matrixmpa_genres)
     
      
-    
-
-
-
-
-
-
-
-
