@@ -22,17 +22,19 @@ def naive_recommender(ratings: object, movies:object, k: int = 10, t: int = 0) -
     top_movies = movies_with_ratings.sort_values("avg_rating", ascending=False)
 
     # Get the top `k` movies with titles, average ratings, and number of ratings as tuples
-    most_seen_movies = list(zip(top_movies["title"], top_movies["avg_rating"].round(3), top_movies["num_ratings"]))
+    most_seen_movies = list(zip(top_movies["movieId"], top_movies["title"], top_movies["avg_rating"].round(3), top_movies["num_ratings"], top_movies["genres"]))
 
     return most_seen_movies[:k]
 
 
 if __name__ == "__main__":
     
-    path_to_ml_latest_small = './data'
+    path_to_ml_latest_small = './irrs5/data'
     dataset = ut.load_dataset_from_source(path_to_ml_latest_small)
     
     ratings, movies = dataset["ratings.csv"], dataset["movies.csv"]
     recs = naive_recommender(ratings, movies, 10, 10)
-    print(recs)
+    
+    for rec in recs:
+        print(rec)
 

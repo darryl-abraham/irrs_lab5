@@ -42,7 +42,7 @@ def user_based_recommender(target_user_idx, matrix):
             # Append the similarity score
             similarity_scores.append((other_user_id, similarity))
 
-    u_max = 10 # select u_max most similar users
+    u_max = 15 # select u_max most similar users
     similarity_scores.sort(key=lambda x: x[1], reverse=True)
     similarity_scores = similarity_scores[:u_max]
   
@@ -51,13 +51,13 @@ def user_based_recommender(target_user_idx, matrix):
     similarity_df = pd.DataFrame(similarity_scores, columns=["userId", "similarity"])
     similarity_df = similarity_df.sort_values(by="similarity", ascending=False)
 
-    print(f"similarity_df.shape = {similarity_df.shape}")
+    #print(f"similarity_df.shape = {similarity_df.shape}")
 
     # Determine the unseen movies by the target user. Those films are identfied 
     # since don't have any rating. 
  
     unseen_movies = target_user[target_user.isna()].index
-    print(f"unseen movies: {len(unseen_movies)}")
+    #print(f"unseen movies: {len(unseen_movies)}")
 
     # Generate recommendations for unrated movies based on user similarity and ratings.
 
@@ -114,6 +114,6 @@ if __name__ == "__main__":
     
     # Validation
     matrixmpa_genres = ut.matrix_genres(dataset["movies.csv"])
-    #print(matrixmpa_genres)
+
     
      
