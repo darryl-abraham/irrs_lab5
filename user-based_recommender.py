@@ -27,13 +27,24 @@ def user_based_recommender(target_user_idx, matrix):
     # We recomend to store the results in a dataframe (userId and Similarity)
     # @TODO 
 
+    similarities = pd.DataFrame(columns=["userId", "similarity"])
+
+    for idx, user in matrix.iterrows():
+        if idx == target_user_idx:
+            continue
+        similarity = sim.compute_similarity(target_user, user)
+        similarities = similarities.append({"userId": idx, "similarity": similarity}, ignore_index=True)
+
     
     # Determine the unseen movies by the target user. Those films are identfied 
     # since don't have any rating. 
     # @TODO 
+
+    unseen_movies = target_user[target_user.isnull()].index
      
     # Generate recommendations for unrated movies based on user similarity and ratings.
     # @ TODO 
+
     
     return recommendations
 
